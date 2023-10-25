@@ -1,4 +1,5 @@
-import { Card, CardContent, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Button, FormControl, Input } from '@mui/base';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputLabel, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
 import { getAllReservations } from '../apis';
@@ -8,41 +9,133 @@ interface ReservationsListProps {
 
 const ReservationList: React.FC<ReservationsListProps> = () => {
     const [reservations, setReservations] = useState<HotelReservation[]>([]);
+    const [filter, setFilter] = useState('');
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [newData, setNewData] = useState({ name: '', age: '', email: '' });
 
-    useEffect(() => {
+    function getReservations () {
         getAllReservations()
             .then((data) => setReservations(data))
             .catch((error) => {
-                console.error('Error fetching appointments:', error);
-                setReservations([]); // Handle the error, e.g., by displaying an error message
+                console.error('Error fetching reservations:', error);
+                setReservations([]);
             });
+    }
+
+    useEffect(() => {
+        getReservations();
     }, []);
+
+    useEffect(() => {
+        const filteredData = reservations.filter((item : HotelReservation) =>
+            item.firstName.toLowerCase().includes(filter.toLowerCase()) ||
+            item.lastName.toLowerCase().includes(filter.toLowerCase()) ||
+            item.email.toLowerCase().includes(filter.toLowerCase())
+        );
+        setReservations(filteredData);
+    }, [filter, reservations]);
+
+    const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFilter(event.target.value);
+        if (!event.target.value) //TODO need to modify to reset search
+            getReservations();
+    };
+    
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    };
+    
+    const handleDialogClose = () => {
+    setDialogOpen(false);
+    };
+
+    const handleAddData = () => {
+        // Add the new data to the existing data (you can add validation and unique IDs as needed)
+        // setData([...data, { id: data.length + 1, ...newData }]);
+        setDialogOpen(false);
+        // Clear the form fields
+        setNewData({ name: '', age: '', email: '' });
+    };
 
     return (
         <div>
-            <h2>Appointments</h2>
-            <List>
-            {reservations.map((reservation) => (
-                <Card key={reservation.id} variant="outlined" style={{ marginBottom: '16px' }}>
-                <CardContent>
-                    <Typography variant="h6">
-                        Stay Duration: {formatStayDuration(reservation.stay)}
-                    </Typography>
-                    <List>
-                    <ListItem>
-                        <ListItemText primary={`First Name: ${reservation.firstName}`} />
-                        </ListItem>
-                        <ListItem>
-                        <ListItemText primary={`Last Name: ${reservation.lastName}`} />
-                        </ListItem>
-                        <ListItem>
-                        <ListItemText primary={`Email: ${reservation.email}`} />
-                        </ListItem>
-                    </List>
-                    </CardContent>
-                </Card>
-                ))}
-            </List>
+            <div className='reservations-header'>
+                <Typography variant='h4' className='reservations-headertext'>
+                    Reservations
+                </Typography>
+                <TextField
+                        className='reservations-search'
+                        label="Search By Guest Name or Email"
+                        variant="outlined"
+                        value={filter}
+                        onChange={handleFilterChange}
+                />
+                <div style={{ flex: 1, textAlign: 'right'}} >
+                    <Button className='button' onClick={handleDialogOpen}>
+                        Make a Reservation
+                    </Button>
+                </div>
+                
+            </div>
+            <TableContainer component={Paper}>
+                <Table>
+                <TableHead>
+                    <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Guest Name</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Arrival</TableCell>
+                    <TableCell>Departure</TableCell>
+                    <TableCell>Stay</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {reservations.map((reservation) => (
+                    <TableRow key={reservation.id}>
+                        <TableCell>{reservation.id}</TableCell>
+                        <TableCell>{reservation.firstName + " " + reservation.lastName}</TableCell>
+                        <TableCell>{reservation.email}</TableCell>
+                        <TableCell>{reservation.stay.arrivalDate}</TableCell>
+                        <TableCell>{reservation.stay.departureDate}</TableCell>
+                        <TableCell>{formatStayDuration(reservation.stay)}</TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </TableContainer>
+            <Dialog open={isDialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>Add Reservation</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Enter data to add:</DialogContentText>
+                    <FormControl>
+                    <InputLabel>Name</InputLabel>
+                    <Input
+                        value={newData.name}
+                        onChange={(e) => setNewData({ ...newData, name: e.target.value })}
+                    />
+                    </FormControl>
+                    <FormControl>
+                    <InputLabel>Age</InputLabel>
+                    <Input
+                        value={newData.age}
+                        onChange={(e) => setNewData({ ...newData, age: e.target.value })}
+                    />
+                    </FormControl>
+                    <FormControl>
+                    <InputLabel>Email</InputLabel>
+                    <Input
+                        value={newData.email}
+                        onChange={(e) => setNewData({ ...newData, email: e.target.value })}
+                    />
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button onClick={handleAddData} color="primary">
+                    Add
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
