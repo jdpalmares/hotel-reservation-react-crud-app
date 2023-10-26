@@ -1,8 +1,10 @@
-import { Button, FormControl, Input } from '@mui/base';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, InputLabel, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Button } from '@mui/base';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
-import { getAllReservations } from '../apis';
+import { addReservation, deleteReservation, getAllReservations } from '../apis';
+import ReservationPopup from './ReservationPopup';
 
 interface ReservationsListProps {
 }
@@ -11,7 +13,6 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
     const [reservations, setReservations] = useState<HotelReservation[]>([]);
     const [filter, setFilter] = useState('');
     const [isDialogOpen, setDialogOpen] = useState(false);
-    const [newData, setNewData] = useState({ name: '', age: '', email: '' });
 
     function getReservations () {
         getAllReservations()
@@ -36,25 +37,30 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
     }, [filter, reservations]);
 
     const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        getReservations();
         setFilter(event.target.value);
-        if (!event.target.value) //TODO need to modify to reset search
-            getReservations();
     };
     
     const handleDialogOpen = () => {
         setDialogOpen(true);
     };
-    
-    const handleDialogClose = () => {
-    setDialogOpen(false);
-    };
 
-    const handleAddData = () => {
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+    
+    const handleAddData = (newData: HotelReservation) => {
         // Add the new data to the existing data (you can add validation and unique IDs as needed)
         // setData([...data, { id: data.length + 1, ...newData }]);
-        setDialogOpen(false);
-        // Clear the form fields
-        setNewData({ name: '', age: '', email: '' });
+        addReservation(newData);
+        getReservations();
+    };
+
+    const handleDeleteData = (id: number) => {
+        // Add the new data to the existing data (you can add validation and unique IDs as needed)
+        // setData([...data, { id: data.length + 1, ...newData }]);
+        deleteReservation(id);
+        getReservations();
     };
 
     return (
@@ -87,55 +93,31 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
                     <TableCell>Arrival</TableCell>
                     <TableCell>Departure</TableCell>
                     <TableCell>Stay</TableCell>
+                    <TableCell>Action</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {reservations.map((reservation) => (
-                    <TableRow key={reservation.id}>
-                        <TableCell>{reservation.id}</TableCell>
-                        <TableCell>{reservation.firstName + " " + reservation.lastName}</TableCell>
-                        <TableCell>{reservation.email}</TableCell>
-                        <TableCell>{reservation.stay.arrivalDate}</TableCell>
-                        <TableCell>{reservation.stay.departureDate}</TableCell>
-                        <TableCell>{formatStayDuration(reservation.stay)}</TableCell>
-                    </TableRow>
+                        <TableRow key={reservation.id}>
+                            <TableCell>{reservation.id}</TableCell>
+                            <TableCell>{reservation.firstName + " " + reservation.lastName}</TableCell>
+                            <TableCell>{reservation.email}</TableCell>
+                            <TableCell>{reservation.stay.arrivalDate}</TableCell>
+                            <TableCell>{reservation.stay.departureDate}</TableCell>
+                            <TableCell>{formatStayDuration(reservation.stay)}</TableCell>
+                            <TableCell>
+                            <IconButton
+                                aria-label="delete"
+                                onClick={() => handleDeleteData(reservation.id)} >
+                                <DeleteIcon />
+                            </IconButton>
+                            </TableCell>
+                        </TableRow>
                     ))}
                 </TableBody>
                 </Table>
             </TableContainer>
-            <Dialog open={isDialogOpen} onClose={handleDialogClose}>
-                <DialogTitle>Add Reservation</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>Enter data to add:</DialogContentText>
-                    <FormControl>
-                    <InputLabel>Name</InputLabel>
-                    <Input
-                        value={newData.name}
-                        onChange={(e) => setNewData({ ...newData, name: e.target.value })}
-                    />
-                    </FormControl>
-                    <FormControl>
-                    <InputLabel>Age</InputLabel>
-                    <Input
-                        value={newData.age}
-                        onChange={(e) => setNewData({ ...newData, age: e.target.value })}
-                    />
-                    </FormControl>
-                    <FormControl>
-                    <InputLabel>Email</InputLabel>
-                    <Input
-                        value={newData.email}
-                        onChange={(e) => setNewData({ ...newData, email: e.target.value })}
-                    />
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button onClick={handleAddData} color="primary">
-                    Add
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ReservationPopup open={isDialogOpen} onClose={handleDialogClose} onAdd={handleAddData}/>
         </div>
     );
 };
