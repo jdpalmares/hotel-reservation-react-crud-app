@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: hotel-reservation-app
+    image: hotel-reservation-react-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      NODE_OPTIONS: --max-old-space-size=8192
+    #     NODE_ENV: production
