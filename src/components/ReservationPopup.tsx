@@ -1,28 +1,35 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Input, InputLabel } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
 import { getDefaultHotelReservation } from '../utils/HotelReservationUtils';
 
 interface ReservationPopupProps {
     open: boolean;
     onClose: () => void;
-    onAdd: (data: HotelReservation) => void;
+    reservationToEdit: HotelReservation | null;
+    onConfirm: (isEdit: boolean, editId: number, data: HotelReservation) => void;
+    isEdit: boolean;
 }
 
-const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, onAdd}) => {
+const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, reservationToEdit, onConfirm, isEdit}) => {
         const [newReservation, setNewReservation] = useState<HotelReservation>(getDefaultHotelReservation());
 
-        const handleAddData = () => {
-            // Add the new data to the existing data (you can add validation and unique IDs as needed)
-            // setData([...data, { id: data.length + 1, ...newData }]);
-            onAdd(newReservation);
+        useEffect(() => {
+            if (isEdit && reservationToEdit)
+                setNewReservation({ ...reservationToEdit });
+            else
+                setNewReservation(getDefaultHotelReservation());
+        }, [isEdit, reservationToEdit]);
+
+        const handleConfirmData = () => {
+            onConfirm(isEdit, reservationToEdit ? reservationToEdit.id : 0, newReservation);
             setNewReservation(getDefaultHotelReservation());
             onClose();
         };
 
     return (
         <Dialog className='reservation-dialog' open={open} onClose={onClose}>
-            <DialogTitle>Add Reservation</DialogTitle>
+            <DialogTitle>{isEdit ? 'Edit Reservation' : 'Add Reservation'}</DialogTitle>
             <DialogContent className='dialog-content'>
                 <br></br>
                 {/* <DatePicker //TODO change arrivalDate date to datepickers
@@ -88,6 +95,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, onAd
                         value={newReservation.email}
                         onChange={(e) => setNewReservation({ ...newReservation, email: e.target.value })}
                     />
+                    <br></br>
                 </FormControl>
                 <FormControl className='reservation-formcontrol'>
                     <InputLabel>Phone Number</InputLabel>
@@ -109,6 +117,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, onAd
                         value={newReservation.addressStreet.streetNumber}
                         onChange={(e) => setNewReservation({ ...newReservation, addressStreet: { ...newReservation.addressStreet, streetNumber: e.target.value}})}
                     />
+                    <br></br>
                 </FormControl>
                 <FormControl className='reservation-formcontrol'>
                     <InputLabel>Zip</InputLabel>
@@ -185,8 +194,8 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, onAd
             </DialogContent>
             <DialogActions className='dialog-actions'>
                 <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleAddData} color="primary">
-                Add
+                <Button onClick={handleConfirmData} color="primary">
+                    {isEdit ? 'Save' : 'Add'}
                 </Button>
             </DialogActions>
         </Dialog>

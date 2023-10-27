@@ -3,7 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
-import { addReservation, deleteReservation, getAllReservations } from '../apis';
+import { addReservation, deleteReservation, getAllReservations, updateReservation } from '../apis';
 import ReservationPopup from './ReservationPopup';
 
 interface ReservationsListProps {
@@ -13,6 +13,8 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
     const [reservations, setReservations] = useState<HotelReservation[]>([]);
     const [filter, setFilter] = useState('');
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const [reservationToEdit, setReservationToEdit] = useState<HotelReservation | null>(null);
+    const [isEdit, setIsEdit] = useState(false);
 
     function getReservations () {
         getAllReservations()
@@ -40,27 +42,33 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
         getReservations();
         setFilter(event.target.value);
     };
-    
-    const handleDialogOpen = () => {
-        setDialogOpen(true);
-    };
 
     const handleDialogClose = () => {
         setDialogOpen(false);
     };
     
-    const handleAddData = (newData: HotelReservation) => {
-        // Add the new data to the existing data (you can add validation and unique IDs as needed)
-        // setData([...data, { id: data.length + 1, ...newData }]);
-        addReservation(newData);
+    const handleConfirmData = (isEdit: boolean, editID: number, newData: HotelReservation) => {
+        if (isEdit)
+            updateReservation(newData, editID);
+        else
+            addReservation(newData);
         getReservations();
     };
 
     const handleDeleteData = (id: number) => {
-        // Add the new data to the existing data (you can add validation and unique IDs as needed)
-        // setData([...data, { id: data.length + 1, ...newData }]);
         deleteReservation(id);
         getReservations();
+    };
+
+    const handleAddClick = () => {
+        setIsEdit(false);
+        setDialogOpen(true);
+    };
+
+    const handleEditClick = (editData: HotelReservation) => {
+        setReservationToEdit(editData);
+        setIsEdit(true);
+        setDialogOpen(true);
     };
 
     return (
@@ -77,7 +85,7 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
                         onChange={handleFilterChange}
                 />
                 <div style={{ flex: 1, textAlign: 'right'}} >
-                    <Button className='button' onClick={handleDialogOpen}>
+                    <Button className='button' onClick={handleAddClick}>
                         Make a Reservation
                     </Button>
                 </div>
@@ -98,7 +106,7 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
                 </TableHead>
                 <TableBody>
                     {reservations.map((reservation) => (
-                        <TableRow key={reservation.id}>
+                        <TableRow key={reservation.id} onDoubleClick={() => handleEditClick(reservation)}>
                             <TableCell>{reservation.id}</TableCell>
                             <TableCell>{reservation.firstName + " " + reservation.lastName}</TableCell>
                             <TableCell>{reservation.email}</TableCell>
@@ -117,7 +125,13 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
                 </TableBody>
                 </Table>
             </TableContainer>
-            <ReservationPopup open={isDialogOpen} onClose={handleDialogClose} onAdd={handleAddData}/>
+            <ReservationPopup
+                open={isDialogOpen}
+                onClose={handleDialogClose}
+                reservationToEdit={reservationToEdit}
+                onConfirm={handleConfirmData}
+                isEdit={isEdit}
+            />
         </div>
     );
 };
