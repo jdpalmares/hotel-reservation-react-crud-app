@@ -11,15 +11,33 @@ interface ReservationPopupProps {
     isEdit: boolean;
 }
 
+const LOCAL_STORAGE_KEY = 'storedReservation';
+
 const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, reservationToEdit, onConfirm, isEdit}) => {
-        const [newReservation, setNewReservation] = useState<HotelReservation>(getDefaultHotelReservation());
+        const [newReservation, setNewReservation] = useState<HotelReservation>( () => {
+            if (localStorage.getItem(LOCAL_STORAGE_KEY)){
+                const storedReservation = localStorage.getItem(LOCAL_STORAGE_KEY);
+                return storedReservation ? JSON.parse(storedReservation) : getDefaultHotelReservation();
+            } else
+                return getDefaultHotelReservation();
+        });
 
         useEffect(() => {
             if (isEdit && reservationToEdit)
                 setNewReservation({ ...reservationToEdit });
-            else
-                setNewReservation(getDefaultHotelReservation());
+            else if (!isEdit){
+                const storedReservation = localStorage.getItem(LOCAL_STORAGE_KEY);
+                return storedReservation ?
+                    setNewReservation(JSON.parse(storedReservation)) :
+                    setNewReservation(getDefaultHotelReservation());
+            }
         }, [isEdit, reservationToEdit]);
+
+        useEffect(() => {
+            if (!isEdit) {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newReservation));
+            }
+        }, [newReservation, isEdit]);
 
         const handleConfirmData = () => {
             onConfirm(isEdit, reservationToEdit ? reservationToEdit.id : 0, newReservation);
