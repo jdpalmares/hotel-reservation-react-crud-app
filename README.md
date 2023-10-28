@@ -3,6 +3,13 @@ A Hotel Reservation CRUD Application using React.js and JSON server
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Project Deployment Badges
+
+![CI/CD](https://github.com/jdpalmares/hotel-reservation-react-crud-app/workflows/CI/CD/badge.svg)
+
+[![codecov](https://codecov.io/gh/jdpalmares/hotel-reservation-react-crud-app/branch/main/graph/badge.svg)](https://codecov.io/gh/jdpalmares/hotel-reservation-react-crud-app)
+
+![License](https://img.shields.io/github/license/jdpalmares/hotel-reservation-react-crud-app)
 ## Available Scripts
 
 In the project directory, you can run:
