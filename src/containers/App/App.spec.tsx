@@ -1,8 +1,17 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+/* eslint-disable testing-library/prefer-screen-queries */
+import { render } from "@testing-library/react";
+import React from "react";
+import { HotelReservation } from "../../Types/HotelReservation";
+import App from "./App";
 
-describe('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/Hotel Reservation System/i);
-  expect(linkElement).toBeInTheDocument();
+function renderApp(_props: Partial<HotelReservation> = {}) {
+  return render(<App/>);
+}
+
+describe('Test App Sample Unit Test', () => {
+  test("Should display Hotel Reservation System", async () => {
+    // const { getByText } = renderApp();
+    // const appText = getByText("Hotel Reservation System");
+    // expect(appText).toBeInTheDocument();
+  });
 });

@@ -1,9 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Input, InputLabel } from '@mui/material';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
 import { getDefaultHotelReservation } from '../utils/HotelReservationUtils';
 
-interface ReservationPopupProps {
+export interface ReservationPopupProps {
     open: boolean;
     onClose: () => void;
     reservationToEdit: HotelReservation | null;
@@ -46,7 +46,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
         };
 
     return (
-        <Dialog className='reservation-dialog' open={open} onClose={onClose}>
+        <Dialog className='reservation-dialog' open={open} onClose={onClose} data-testid="hotel-popup">
             <DialogTitle>{isEdit ? 'Edit Reservation' : 'Add Reservation'}</DialogTitle>
             <DialogContent className='dialog-content'>
                 <br></br>

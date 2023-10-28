@@ -6,7 +6,7 @@ import { HotelReservation } from '../Types/HotelReservation';
 import { addReservation, deleteReservation, getAllReservations, updateReservation } from '../apis';
 import ReservationPopup from './ReservationPopup';
 
-interface ReservationsListProps {
+export interface ReservationsListProps {
 }
 
 const ReservationList: React.FC<ReservationsListProps> = () => {
@@ -72,7 +72,7 @@ const ReservationList: React.FC<ReservationsListProps> = () => {
     };
 
     return (
-        <div>
+        <div data-testid="hotel-list">
             <div className='reservations-header'>
                 <Typography variant='h4' className='reservations-headertext'>
                     Reservations
