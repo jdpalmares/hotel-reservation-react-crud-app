@@ -28,6 +28,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "jest",
@@ -56,6 +58,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-typescript": "^7.23.2",
     "@jest/globals": "^29.7.0",
+    "gh-pages": "^6.0.0",
     "jest-environment-jsdom": "^29.7.0"
   }
 }
