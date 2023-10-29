@@ -21,6 +21,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
             } else
                 return getDefaultHotelReservation();
         });
+        const isFormValid = Object.values(newReservation).every((value) => value !== '');
 
         useEffect(() => {
             if (isEdit && reservationToEdit)
@@ -90,6 +91,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
                         value={newReservation.room.roomQuantity}
                         onChange={(e) => setNewReservation({ ...newReservation, room: { ...newReservation.room, roomQuantity: Number(e.target.value)}})}
                     />
+                    <br></br>
                 </FormControl>
                 <FormControl className='reservation-formcontrol'>
                     <InputLabel>First Name</InputLabel>
@@ -105,8 +107,6 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
                         onChange={(e) => setNewReservation({ ...newReservation, lastName: e.target.value })}
                     />
                 </FormControl>
-            </DialogContent>
-            <DialogContent className='dialog-content'>
                 <FormControl className='reservation-formcontrol'>
                     <InputLabel>Email</InputLabel>
                     <Input
@@ -212,7 +212,7 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
             </DialogContent>
             <DialogActions className='dialog-actions'>
                 <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleConfirmData} color="primary">
+                <Button onClick={handleConfirmData} color="primary" disabled={!isFormValid}>
                     {isEdit ? 'Save' : 'Add'}
                 </Button>
             </DialogActions>
