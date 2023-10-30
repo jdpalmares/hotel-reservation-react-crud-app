@@ -1,3 +1,5 @@
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import React from 'react';
 import ReservationList from '../../components/ReservationList';
 import logo from '../../lib/media/icons/logo.svg';
@@ -11,7 +13,9 @@ function App() {
         <h3>Hotel Reservation System</h3>
       </header>
       <main>
-        <ReservationList />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <ReservationList />
+        </LocalizationProvider>
       </main>
     </div>
   );

@@ -1,4 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Input, InputLabel } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs, { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { HotelReservation } from '../Types/HotelReservation';
 import { getDefaultHotelReservation } from '../utils/HotelReservationUtils';
@@ -21,7 +25,10 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
             } else
                 return getDefaultHotelReservation();
         });
-        const isFormValid = Object.values(newReservation).every((value) => value !== '');
+        const isFormValid = Object.values(newReservation).every((value) => value !== '') &&
+        newReservation.stay.arrivalDate < newReservation.stay.departureDate;
+        //uncomment line below and remove semicolon to have a legitimate arrival date
+        // && newReservation.stay.arrivalDate > toLocaleString(dayjs().add(12, 'hour'));
 
         useEffect(() => {
             if (isEdit && reservationToEdit)
@@ -46,38 +53,57 @@ const ReservationPopup : React.FC<ReservationPopupProps> = ({open, onClose, rese
             onClose();
         };
 
+        function toLocaleString(date: Dayjs): string {
+            
+            const dayjsIst = date.locale(navigator.language); //TODO change depending on locale of client
+            const istString = dayjsIst.format('YYYY-MM-DDTHH:mm:ss');
+            // let dateAsString =  date.set('hour', date.hour() - (date.utcOffset() * 60)).toISOString();
+            return istString;
+        }
+
     return (
         <Dialog className='reservation-dialog' open={open} onClose={onClose} data-testid="hotel-popup">
             <DialogTitle>{isEdit ? 'Edit Reservation' : 'Add Reservation'}</DialogTitle>
             <DialogContent className='dialog-content'>
                 <br></br>
-                {/* <DatePicker //TODO change arrivalDate date to datepickers
-                    label="From Date"
-                    value={newReservation.stay.arrivalDate}
-                    onChange={(date: Date ) => setNewReservation({ ...newReservation, stay: { ...newReservation.stay, arrivalDate: date.toISOString()}})}
-                    renderInput={(params : Text) => <TextField {...params} className='date-picker-container'/>}
-                /> */}
-                {/* <DatePicker //TODO change departureDate date to datepickers
-                    label="To Date"
-                    value={newReservation.stay.departureDate}
-                    onChange={(date: Date ) => setNewReservation({ ...newReservation, stay: { ...newReservation.stay, departureDate: date.toISOString()}})}
-                    renderInput={(params : Text) => <TextField {...params} className='date-picker-container'/>}
-                /> */}
-                <FormControl className='reservation-formcontrol'>
-                    <InputLabel>Arrival Date</InputLabel>
-                    <Input
-                        value={newReservation.stay.arrivalDate}
-                        onChange={(e) => setNewReservation({ ...newReservation, stay: { ...newReservation.stay, arrivalDate: e.target.value}})}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                        value={dayjs(newReservation.stay.arrivalDate)}
+                        label="Arrival Date"
+                        onChange={
+                            (date : Dayjs | null) => {
+                                setNewReservation({
+                                    ...newReservation,
+                                    stay: {
+                                        ...newReservation.stay,
+                                        arrivalDate: date ? toLocaleString(date) : ""
+                                    }
+                                });
+                            }
+                        }
+                        //uncomment line below to have a legitimate arrival date
+                        // minDateTime={dayjs().add(12, 'hour')}
                     />
-                    <br></br>
-                </FormControl>
-                <FormControl className='reservation-formcontrol'>
-                    <InputLabel>Departure Date</InputLabel>
-                    <Input
-                        value={newReservation.stay.departureDate}
-                        onChange={(e) => setNewReservation({ ...newReservation, stay: { ...newReservation.stay, departureDate: e.target.value}})}
+                </LocalizationProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                        value={dayjs(newReservation.stay.departureDate)}
+                        label="Departure Date"
+                        onChange={
+                            (date : Dayjs | null) => {
+                                setNewReservation({
+                                    ...newReservation,
+                                    stay: {
+                                        ...newReservation.stay,
+                                        departureDate: date ? toLocaleString(date) : ""
+                                    }
+                                });
+                            }
+                        }
+                        minDateTime={dayjs(newReservation.stay.arrivalDate).add(1, 'day')}
                     />
-                </FormControl>
+                </LocalizationProvider>
+                <br></br><br></br>
                 <FormControl className='reservation-formcontrol'>
                     <InputLabel>Room Size</InputLabel>
                     <Input
